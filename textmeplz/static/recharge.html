@@ -1,0 +1,113 @@
+<style>
+    #box {
+        box-shadow: 5px 5px 10px 0px;
+        border-radius: 0px 0px 15px 15px;
+    }
+
+    #box > div.header {
+        height: 50px;
+        background-color: #455A64;
+        color: #FFFFFF;
+        padding: 10px;
+    }
+
+    .header > span {
+        font-family: Helvetica;
+        font-size: x-large;
+        font-weight: bolder;
+    }
+
+    #box > div.body {
+        background-color: #607D8B;
+        padding: 25px 10px 25px 10px;
+        border-radius: 0px 0px 13px 13px;
+    }
+
+    div.body > * {
+        color: #FFFFFF;
+    }
+
+    input.form-control {
+        color: #000000;
+    }
+
+    footer {
+        height: 100px;
+    }
+
+    .buffer-25 {
+        padding-bottom: 25px;
+    }
+
+    .ng-invalid {
+        border-color: #ff0033;
+    }
+
+</style>
+
+<div class="container-fluid">
+    <div class="row buffer-25"></div>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 ">
+            <div id="box">
+
+                <div class="header">
+                    <span>Recharge Account</span>
+
+                    <div class="icon pull-right">
+                        <span><i class="fa fa-times fa-lg"></i></span>
+                    </div>
+                </div>
+
+                <div class="body">
+                    <form name="paymentsForm" stripe-form="stripeCallback">
+                        <div class="form-group">
+                            <label class="form-label">Amount</label>
+                            <select class="form-control" id="amount"
+                                    ng-model="amount"
+                                    ng-options="price as '$' + price + ' - ' + recharge.priceMap[price] + ' messages' for price in recharge.prices" required>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Cardholder Name</label>
+                            <input class="form-control" type="text" ng-model="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Card Number</label>
+                            <input class="form-control" type="text" name="card" ng-model="number" payments-validate="card" payments-format="card" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Expiration Month</label>
+                            <select class="form-control"
+                                    ng-model="expMonth"
+                                    ng-options="month for month in recharge.months"
+                                    required>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Expiration Year</label>
+                            <select class="form-control"
+                                    ng-model="expYear"
+                                    ng-options="year for year in recharge.getYears()"
+                                    required>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CVC</label>
+                            <input class="form-control" type="text" ng-model="cvc" payments-format="cvc" payments-validate="cvc" required>
+                        </div>
+
+                        <div class="row"><span><br></span></div>
+                        <button type="submit" class="btn btn-info btn-lg btn-block" ng-disabled="paymentsForm.$invalid">Submit Payment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

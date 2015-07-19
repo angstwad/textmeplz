@@ -1,0 +1,91 @@
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="buffer-50">
+            <h2>User</h2>
+            <dl class="dl-horizontal">
+                <dt>Username</dt>
+                <dd>{{ acctCtrl.data.administrative.username }}</dd>
+
+                <dt>Name</dt>
+                <dd>{{ acctCtrl.data.administrative.full_name|titlecase }}</dd>
+
+                <dt>Notification Email</dt>
+                <dd>{{ acctCtrl.data.metadata.mailhook_id }}@mg.textmeplz.com</dd>
+
+                <div ng-show="acctCtrl.data.metadata.phone_numbers.length === 0">
+                    <dt>Number</dt>
+                    <dd>No number has been added.</dd>
+                </div>
+
+
+                <div ng-show="acctCtrl.data.metadata.phone_numbers.length > 0"
+                     ng-repeat="number in acctCtrl.data.metadata.phone_numbers track by $index">
+                    <dt>Number</dt>
+                    <dd>{{ number }} - <a ng-click="acctCtrl.deleteNumber(number)"><span class="text-danger"><i class="fa fa-trash"></i> Delete</span></a></dd>
+                </div>
+            </dl>
+
+            <h4>Add Number</h4>
+            <div class="number-form">
+                <p class="text-info"><strong>Note:</strong> Only US and Canadian Numbers are supported at this time.</p>
+                <form name="numberForm" class="form-inline">
+                    <div style="margin-bottom: 10px;">
+                      <div class="form-group">
+                        <label for="inputPhone">Phone Number</label>
+                        <input type="number" class="form-control" ng-minlength="10" ng-maxlength="10"  id="inputPhone" name="phone" placeholder="Phone" ng-model="acctCtrl.phoneNumberInput" ng-required="true" ng-model-options="{ debounce: 500 }">
+                      </div>
+                      <button type="button" class="btn btn-primary" ng-disabled="numberForm.$invalid" ng-click="acctCtrl.addNumber()"><i class="fa fa-phone"></i> Add Number</button>
+                    </div>
+                    <alert ng-show="numberForm.phone.$error.minlength || numberForm.phone.$error.maxlength" type="danger">Please enter a valid 10-digit phone number.</alert>
+                    <alert ng-show="numberForm.phone.$error.number" type="danger">Please ensure the number contains only digits (no dashes or spaces).</alert>
+                </form>
+            </div>
+        </div>
+
+        <div class="buffer-50">
+            <h2>Account</h2>
+            <dl class="dl-horizontal">
+                <dt>Status</dt>
+                <dd ng-class="{'text-danger': !acctCtrl.isActive}">{{ acctCtrl.isActive ? 'Active' : 'Inactive' }}</dd>
+            </dl>
+
+            <button type="button" class="btn btn-success"
+                    ng-hide="acctCtrl.isActive"
+                    ng-click="acctCtrl.activate()">
+                <i class="fa fa-plus"></i> Activate </button>
+            <button type="button" class="btn btn-danger"
+                    ng-show="acctCtrl.isActive"
+                    ng-click="acctCtrl.deactivate()">
+                <i class="fa fa-times"></i> Deactivate</button>
+        </div>
+
+        <div class="buffer-50">
+            <h2>Messages</h2>
+            <dl class="dl-horizontal">
+                <dt>Messages Remaining</dt>
+                <dd>{{ acctCtrl.data.metadata.messages_remaining }}</dd>
+            </dl>
+
+            <p ng-show="acctCtrl.data.metadata.messages_remaining == 0">Looks
+                like you're out of messages. Would you like to recharge?</p>
+
+            <p ng-show="acctCtrl.data.metadata.messages_remaining <= 10 && acctCtrl.data.metadata.messages_remaining > 0">
+                You're running low on messages. Would you like to get more?</p>
+            <a href="/app#/account/recharge"><button type="button" class="btn btn-sm btn-primary"><i class="fa fa-envelope-o"></i> Get More Messages</button></a>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h2>Transactions</h2>
+
+        <p ng-show="acctCtrl.data.metadata.transactions.length === 0">None.</p>
+
+        <div class="transactions"
+             ng-show="acctCtrl.data.metadata.transactions.length > 0">
+            <pre>
+            {{ acctCtrl.data.metadata.transactions|json }}
+            </pre>
+        </div>
+    </div>
+</div>
