@@ -1,3 +1,16 @@
+.buffer-25 {
+    padding-bottom: 25px;
+}
+
 .buffer-50 {
     margin-bottom: 50px;
 }
+
+.buffer-75 {
+    margin-bottom: 75px;
+}
+
+.buffer-100 {
+    margin-bottom: 100px;
+}
+

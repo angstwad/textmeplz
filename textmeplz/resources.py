@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-import uuid
-from flask.ext.restful.reqparse import RequestParser
 
+import stripe
+from rq import queue
+from bs4 import BeautifulSoup
 from flask.ext.stormpath import user
+from flask import current_app, request
 from flask.ext.login import login_required
+from flask.ext.restful.reqparse import RequestParser
 from flask.ext.restful import Resource, abort, marshal, fields
-from pprint import pprint
-from exc import MailgunError
 
+import data
+from exc import MailgunError
 from textmeplz import validators
-from textmeplz.mongo import User, get_or_create_userdoc
-from utils import create_mailgun_route, delete_mailgun_route
+from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
+from utils import create_mailgun_route, delete_mailgun_route, send_picture
 
 
 class UserInfoResource(Resource):
@@ -96,3 +99,55 @@ class AccountActivation(Resource):
             userdoc.save()
         return {'message': 'ok'}
 
+
+class ProcessPayment(Resource):
+    """ /api/payment/process
+    """
+    decorators = [login_required]
+
+    parser = RequestParser()
+    parser.add_argument('card', type=dict, required=True)
+    parser.add_argument('amount', type=int, required=True)
+
+    def post(self):
+        args = self.parser.parse_args()
+        try:
+            assert args.amount in data.PRICE_MAP, \
+                "%s is not a valid amount" % args.amount
+            assert u"id" in args.card, "missing strip transaction id"
+        except AssertionError as e:
+            abort(400, message=e.message)
+
+        charge = stripe.Charge.create(
+            amount=args.amount * 100,
+            currency="usd",
+            source=args.card['id'],
+            description="Recharge for user %s" % user.username
+        )
+        if not charge['captured']:
+            current_app.logger.error(charge)
+            abort(402, message="failed to charge")
+
+        userdoc = get_or_create_userdoc(user.username)
+        userdoc['transactions'].append(charge)
+        userdoc['messages_remaining'] += data.PRICE_MAP[args.amount];
+        userdoc.save()
+        return {'message': 'successful'}
+
+
+class HookResource(Resource):
+    def post(self, id):
+        conn = get_mongoconn()
+        userdoc = conn.User.find_one({'mailhook_id': id})
+        if not userdoc:
+            abort(404)
+        req_body_html = request.form.get('body-html', '')
+        if not req_body_html:
+            abort(400)
+        soup = BeautifulSoup(req_body_html)
+        img_url = soup.img.get('src')
+
+        for number in userdoc['phone_numbers']:
+            queue.enqueue(send_picture, number, img_url)
+
+        return {'message': 'ok'}

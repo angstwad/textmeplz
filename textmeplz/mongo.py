@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import uuid
-import datetime
 
 from mongokit import Document, Connection
 
@@ -14,12 +13,7 @@ class User(Document):
     structure = {
         'email': basestring,
         'phone_numbers': [basestring],
-        'transactions': [{
-            'amount': basestring,
-            'when': datetime.datetime,
-            'messages': int,
-            'trans_id': basestring,
-        }],
+        'transactions': [dict],
         'messages_remaining': int,
         'mailhook_id': basestring,
         'mailgun_route_id': basestring,

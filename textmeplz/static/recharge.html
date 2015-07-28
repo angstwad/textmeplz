@@ -27,6 +27,10 @@
         color: #FFFFFF;
     }
 
+    div.icon a {
+        color: #FFFFFF;
+    }
+
     input.form-control {
         color: #000000;
     }
@@ -35,15 +39,13 @@
         height: 100px;
     }
 
-    .buffer-25 {
-        padding-bottom: 25px;
-    }
-
-    .ng-invalid {
+    .ng-touched.ng-invalid {
         border-color: #ff0033;
     }
 
 </style>
+
+<div ng-show="processing" us-spinner></div>
 
 <div class="container-fluid">
     <div class="row buffer-25"></div>
@@ -55,12 +57,12 @@
                     <span>Recharge Account</span>
 
                     <div class="icon pull-right">
-                        <span><i class="fa fa-times fa-lg"></i></span>
+                        <a href="/app#/account"><i class="fa fa-times fa-lg"></i></a>
                     </div>
                 </div>
 
                 <div class="body">
-                    <form name="paymentsForm" stripe-form="stripeCallback">
+                    <form name="paymentsForm" stripe-form="stripeCallback" ng-submit="onSubmit()">
                         <div class="form-group">
                             <label class="form-label">Amount</label>
                             <select class="form-control" id="amount"
@@ -80,22 +82,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Expiration Month</label>
-                            <select class="form-control"
-                                    ng-model="expMonth"
-                                    ng-options="month for month in recharge.months"
-                                    required>
-                                <option value="1">1</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Expiration Year</label>
-                            <select class="form-control"
-                                    ng-model="expYear"
-                                    ng-options="year for year in recharge.getYears()"
-                                    required>
-                            </select>
+                            <label class="form-label">Expiration</label>
+                            <input class="form-control" type="text" ng-model="expiry" payments-validate="expiry" payments-format="expiry" placeholder="mm / yyyy" required>
                         </div>
 
                         <div class="form-group">

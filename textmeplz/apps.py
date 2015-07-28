@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
+import stripe
 from flask import Flask
 from flask.ext.restful import Api
 from flask.ext.stormpath import StormpathManager
 
-from .config import config
-from .views import index, bomb
-from .resources import UserInfoResource, AccountActivation, PhoneNumber
+from config import config
+from views import index, bomb
+from resources import (
+    UserInfoResource, AccountActivation, PhoneNumber, ProcessPayment,
+    HookResource
+)
 
 routes = [
     # (route, name, view function)
@@ -18,6 +22,8 @@ api_resources = [
     ('/api/user', UserInfoResource),
     ('/api/user/phone', PhoneNumber),
     ('/api/user/activate', AccountActivation),
+    ('/api/payment/process', ProcessPayment),
+    ('/webhook/<id>', HookResource)
 ]
 
 
@@ -27,6 +33,8 @@ def create_app():
 
     stormpath_mgr = StormpathManager(flask_app)
     api = Api(flask_app)
+
+    stripe.api_key = config.STRIPE_KEY
 
     for route, name, viewfunc in routes:
         flask_app.add_url_rule(route, name, viewfunc)

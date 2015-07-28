@@ -2,13 +2,16 @@
 
 import requests
 from requests.exceptions import HTTPError
+from twilio.rest import TwilioRestClient
 
-from .config import config
-from .exc import MailgunError
+from exc import MailgunError
+from config.config import (
+    MAILGUN_API_KEY, MAILHOOK_URL, TWILIO_NUMBER, TWILIO_SID, TWILIO_TOKEN
+)
 
 
 def get_mailgun_auth():
-    return ('api', config.MAILGUN_API_KEY)
+    return 'api', MAILGUN_API_KEY
 
 
 def create_mailgun_route(mailhook_id):
@@ -18,7 +21,7 @@ def create_mailgun_route(mailhook_id):
         'description': "TextMePlz user identified by %s" % mailhook_id,
         'expression': "match_recipient('%s@mg.textmeplz.com')" % mailhook_id,
         'action': [
-            "forward('%s/%s')" % (config.MAILHOOK_URL, mailhook_id),
+            "forward('%s/%s')" % (MAILHOOK_URL, mailhook_id),
             "stop()"
         ]
     }
@@ -42,3 +45,17 @@ def delete_mailgun_route(route_id):
         err.response = e.response
         raise err
     return resp.json()
+
+
+def get_twilio():
+    return TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
+
+
+def send_picture(recipient, media_url):
+    twclient = get_twilio()
+    message = twclient.messages.create(
+        from_=TWILIO_NUMBER,
+        to=recipient,
+        media_url=media_url,
+    )
+    return message

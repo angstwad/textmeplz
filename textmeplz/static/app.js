@@ -1,5 +1,5 @@
 (function () {
-    angular.module('textmeplz.config', ['angularPayments', 'oitozero.ngSweetAlert'])
+    angular.module('textmeplz.config', ['angularPayments', 'angularSpinner', 'oitozero.ngSweetAlert'])
         .constant('appConfig', {
             backend: 'http://127.0.0.1:5000/api'
         });
@@ -124,9 +124,13 @@
 
 
     app.controller('rechargeController', [
+        '$q',
+        '$http',
         '$scope',
+        '$location',
+        'appConfig',
         'SweetAlert',
-        function ($scope, SweetAlert) {
+        function ($q, $http, $scope, $location, appConfig, SweetAlert) {
             var self = this;
 
             $scope.amount = 10;
@@ -139,27 +143,76 @@
                 50: 1600,
                 100: 3400
             };
-            this.months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
 
-            this.getYears = function(){
-                var startYear = new Date().getFullYear(),
-                    endYear = startYear + 5,
-                    years = [];
-                while ( startYear <= endYear ) { years.push(startYear++); }
-                return years;
-            };
-
-            function sendPaymentBack(paymentObj){
-
+            function chargeCard(card){
+                var deferred = $q.defer();
+                var data = {
+                    amount: $scope.amount,
+                    card: card
+                };
+                $http.post(appConfig.backend + '/payment/process', data).then(
+                    function(response){
+                        deferred.resolve(response.data);
+                    },
+                    function(response){
+                        deferred.reject(response);
+                    }
+                );
+                return deferred.promise;
             }
 
+            $scope.onSubmit = function() {
+                $scope.processing = true;
+            };
+
             $scope.stripeCallback = function(status, response){
-                if (status != 200){
-
-                } else {
-
+                if (status == 402){
+                    $scope.processing = false;
+                    SweetAlert.swal({
+                        title: 'There was a problem processing payment!',
+                        text: response.error.message,
+                        type: 'error'
+                    });
+                }
+                else if (status != 200){
+                    $scope.processing = false;
+                    SweetAlert.swal({
+                        title: 'There was a problem processing payment!',
+                        text: 'An unknown error occurred.  Your card was not charged.',
+                        type: 'error'
+                    });
+                }
+                else {
+                    var promise = chargeCard(response);
+                    promise.then(
+                        function(data){
+                            SweetAlert.swal({
+                                title: 'Complete!',
+                                text: 'Your account has been successfully recharged.',
+                                type: 'success',
+                                timeout: 3000
+                            }, function(){
+                                $location.url('/account');
+                            });
+                        },
+                        function(response){
+                            SweetAlert.swal({
+                                title: 'There was a problem processing payment!',
+                                text: 'An unknown error occurred.  Your card was not charged.',
+                                type: 'error'
+                            }, function(){
+                                $location.url('/account');
+                            });
+                        }
+                    );
+                    promise.finally(function(){
+                        $scope.processing = false;
+                    });
                 }
             };
+
         }
     ]);
+
+
 })();
