@@ -1,7 +1,7 @@
 (function () {
     angular.module('textmeplz.config', ['angularPayments', 'angularSpinner', 'oitozero.ngSweetAlert'])
         .constant('appConfig', {
-            backend: 'http://127.0.0.1:5000/api'
+            backend: 'https://textmeplz.com/api'
         });
 
     var app = angular.module('textmeplz.app', [
