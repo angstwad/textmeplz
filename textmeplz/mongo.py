@@ -22,7 +22,7 @@ class User(Document):
     required_fields = ['email']
 
     default_values = {
-        'messages_remaining': 0,
+        'messages_remaining': 5,
     }
 
 _mongo_conn = None
