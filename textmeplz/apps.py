@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 from redis import Redis
 
 import stripe
@@ -32,6 +33,11 @@ def create_app():
     flask_app = Flask(__name__)
     flask_app.config.from_object(config)
     flask_app.error_handler_spec[None][500] = exception_handler
+
+    if not flask_app.debug:
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(logging.INFO)
+        flask_app.logger.addHandler(stream_handler)
 
     stormpath_mgr = StormpathManager(flask_app)
     api = Api(flask_app)
