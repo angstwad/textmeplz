@@ -4,6 +4,7 @@ import logging
 import stripe
 from flask import Flask
 from flask.ext.restful import Api
+from opbeat.contrib.flask import Opbeat
 from flask.ext.stormpath import StormpathManager
 
 from config import config
@@ -34,6 +35,7 @@ def create_app():
 
     stormpath_mgr = StormpathManager(flask_app)
     api = Api(flask_app)
+    opbeat = Opbeat(flask_app)
 
     stripe.api_key = config.STRIPE_KEY
 
@@ -50,7 +52,8 @@ def create_app():
 
     retval = {
         'flask': flask_app,
-        'stormpath': stormpath_mgr
+        'stormpath': stormpath_mgr,
+        'opbeat': opbeat,
     }
 
     return retval
