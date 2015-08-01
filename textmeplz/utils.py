@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
+from redis import Redis
 
 import requests
-from requests.exceptions import HTTPError
+from rq import Queue
 from twilio.rest import TwilioRestClient
+from requests.exceptions import HTTPError
 
+from config import config
 from exc import MailgunError
 from config.config import (
     MAILGUN_API_KEY, MAILHOOK_URL, TWILIO_NUMBER, TWILIO_SID, TWILIO_TOKEN
 )
 
+redis_conn = Redis(config.REDIS_HOST)
+queue = Queue(connection=redis_conn)
 
 def get_mailgun_auth():
     return 'api', MAILGUN_API_KEY

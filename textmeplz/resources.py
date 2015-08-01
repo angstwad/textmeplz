@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import stripe
-from rq import queue
 from bs4 import BeautifulSoup
 from flask.ext.stormpath import user
 from flask import current_app, request
@@ -13,7 +12,7 @@ import data
 from exc import MailgunError
 from textmeplz import validators
 from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
-from utils import create_mailgun_route, delete_mailgun_route, send_picture
+from utils import create_mailgun_route, delete_mailgun_route, send_picture, queue
 
 
 class UserInfoResource(Resource):
@@ -142,6 +141,7 @@ class HookResource(Resource):
         if not userdoc:
             abort(404)
         req_body_html = request.form.get('body-html', '')
+        print req_body_html
         if not req_body_html:
             abort(400)
         soup = BeautifulSoup(req_body_html)

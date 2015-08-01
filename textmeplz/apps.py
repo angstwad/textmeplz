@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from redis import Redis
 
 import stripe
 from flask import Flask
