@@ -31,11 +31,6 @@ def create_app():
     flask_app = Flask(__name__)
     flask_app.config.from_object(config)
 
-    @flask_app.errorhandler(500)
-    def handle_exceptions(error):
-        flask_app.logger.exception(error)
-        return "Svr failwhale", 500
-
     stormpath_mgr = StormpathManager(flask_app)
     api = Api(flask_app)
 

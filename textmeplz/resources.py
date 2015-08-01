@@ -141,10 +141,9 @@ class HookResource(Resource):
         if not userdoc:
             abort(404)
         req_body_html = request.form.get('body-html', '')
-        print req_body_html
         if not req_body_html:
             abort(400)
-        soup = BeautifulSoup(req_body_html)
+        soup = BeautifulSoup(req_body_html, 'html.parser')
         img_url = soup.img.get('src')
 
         for number in userdoc['phone_numbers']:
