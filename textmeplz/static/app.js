@@ -33,7 +33,7 @@
                 controllerAs: 'recharge'
             })
             .otherwise('/account');
-        window.Stripe.setPublishableKey('pk_test_rOeDMssmkV4UlUTAcVYBZYSy');
+        window.Stripe.setPublishableKey('pk_live_Q9LQQ3UXnLwAvxsnwHNsMhgJ');
     });
 
 
