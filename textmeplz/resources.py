@@ -7,6 +7,7 @@ from flask import current_app, request
 from flask.ext.login import login_required
 from flask.ext.restful.reqparse import RequestParser
 from flask.ext.restful import Resource, abort, marshal, fields
+import time
 
 import data
 from exc import MailgunError
@@ -146,7 +147,31 @@ class HookResource(Resource):
         soup = BeautifulSoup(req_body_html, 'html.parser')
         img_url = soup.img.get('src')
 
+        jobs = []
         for number in userdoc['phone_numbers']:
-            queue.enqueue(send_picture, number, img_url)
+            userdoc.update()
+            if userdoc['messages_remaining'] > 0:
+                jobs.append(queue.enqueue(send_picture, number, img_url))
+                userdoc['messages_remaining'] -= 1
+                userdoc.save()
+
+        cycles = 0
+        while True:
+            results = [job.result for job in jobs]
+            if None not in results:
+                break
+            elif cycles > 150:
+                bad_jobs = [job.result.sid for job in jobs if job is None]
+                current_app.logger.error(
+                    'Had unfinished jobs after 150 checks (~15 secs): '
+                    '%s' % (', '.join(bad_jobs))
+                )
+                userdoc.update()
+                userdoc['messages_remaininge'] += results.count(None)
+                userdoc.save()
+                abort(500)
+
+            cycles += 1
+            time.sleep(.1)
 
         return {'message': 'ok'}
