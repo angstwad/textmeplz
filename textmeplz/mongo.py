@@ -31,7 +31,7 @@ _mongo_conn = None
 def get_mongoconn():
     global _mongo_conn
     if _mongo_conn is None:
-        _mongo_conn = Connection(config.MONGO_URI)
+        _mongo_conn = Connection(config.MONGO_URI, **config.MONGO_KWARGS)
         _mongo_conn.register([User])
     return _mongo_conn
 
