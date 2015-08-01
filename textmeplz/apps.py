@@ -10,7 +10,7 @@ from config import config
 from views import index, bomb
 from resources import (
     UserInfoResource, AccountActivation, PhoneNumber, ProcessPayment,
-    HookResource
+    HookResource, exception_handler
 )
 
 routes = [
@@ -31,6 +31,7 @@ api_resources = [
 def create_app():
     flask_app = Flask(__name__)
     flask_app.config.from_object(config)
+    flask_app.error_handler_spec[None][500] = exception_handler
 
     stormpath_mgr = StormpathManager(flask_app)
     api = Api(flask_app)

@@ -15,6 +15,11 @@ from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
 from utils import create_mailgun_route, delete_mailgun_route, send_picture, queue
 
 
+def exception_handler(error):
+    current_app.logger.exception(error)
+    return "Internal Server Error", 500
+
+
 class UserInfoResource(Resource):
     """ /api/user
     """
