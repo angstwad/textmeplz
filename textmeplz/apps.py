@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-import logging
-from redis import Redis
 
 import stripe
-from flask import Flask
+from flask import Flask, current_app
 from flask.ext.restful import Api
 from flask.ext.stormpath import StormpathManager
 
@@ -11,7 +9,7 @@ from config import config
 from views import index, bomb
 from resources import (
     UserInfoResource, AccountActivation, PhoneNumber, ProcessPayment,
-    HookResource, exception_handler
+    HookResource
 )
 
 routes = [
@@ -32,12 +30,11 @@ api_resources = [
 def create_app():
     flask_app = Flask(__name__)
     flask_app.config.from_object(config)
-    flask_app.error_handler_spec[None][500] = exception_handler
 
-    if not flask_app.debug:
-        stream_handler = logging.StreamHandler()
-        stream_handler.setLevel(logging.INFO)
-        flask_app.logger.addHandler(stream_handler)
+    @flask_app.errorhandler(500)
+    def handle_exceptions(error):
+        current_app.logger.exception(error)
+        return "Svr failwhale", 500
 
     stormpath_mgr = StormpathManager(flask_app)
     api = Api(flask_app)
