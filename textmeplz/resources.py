@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 
 import stripe
 from bs4 import BeautifulSoup
@@ -7,11 +8,10 @@ from flask import current_app, request
 from flask.ext.login import login_required
 from flask.ext.restful.reqparse import RequestParser
 from flask.ext.restful import Resource, abort, marshal, fields
-import time
 
-import data
-from exc import MailgunError
+from textmeplz import data
 from textmeplz import validators
+from textmeplz.exc import MailgunError
 from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
 from utils import create_mailgun_route, delete_mailgun_route, send_picture, queue
 
@@ -137,16 +137,22 @@ class ProcessPayment(Resource):
 
 class HookResource(Resource):
 
-    def post(self, id):
+    def post(self, _id):
         conn = get_mongoconn()
-        userdoc = conn.User.find_one({'mailhook_id': id})
+        userdoc = conn.User.find_one({'mailhook_id': _id})
         if not userdoc:
-            abort(404)
+            abort(404, message="id not found")
         req_body_html = request.form.get('body-html', '')
         if not req_body_html:
             abort(400)
         soup = BeautifulSoup(req_body_html, 'html.parser')
         img_url = soup.img.get('src')
+
+        current_app.logger.info(
+            'Mailhook for %s (%s) with Mailgun ID %s.' % (
+                userdoc['email'], _id, request.form.get('Message-Id')
+            )
+        )
 
         # Make jobs
         jobs = []
@@ -177,5 +183,16 @@ class HookResource(Resource):
 
             cycles += 1
             time.sleep(.1)
+
+        for job in jobs:
+            try:
+                sid = job.result.sid
+            except AttributeError:
+                sid = None
+            current_app.logger.info(
+                "User %s (%s) created message id %s." % (
+                    userdoc['email'], _id, sid
+                )
+            )
 
         return {'message': 'ok'}

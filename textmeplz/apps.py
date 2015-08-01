@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 
 import stripe
-from flask import Flask, current_app
+from flask import Flask
 from flask.ext.restful import Api
 from flask.ext.stormpath import StormpathManager
 
@@ -23,7 +24,7 @@ api_resources = [
     ('/api/user/phone', PhoneNumber),
     ('/api/user/activate', AccountActivation),
     ('/api/payment/process', ProcessPayment),
-    ('/webhook/<id>', HookResource)
+    ('/webhook/<_id>', HookResource)
 ]
 
 
