@@ -33,7 +33,7 @@ def create_app():
 
     @flask_app.errorhandler(500)
     def handle_exceptions(error):
-        current_app.logger.exception(error)
+        flask_app.logger.exception(error)
         return "Svr failwhale", 500
 
     stormpath_mgr = StormpathManager(flask_app)
