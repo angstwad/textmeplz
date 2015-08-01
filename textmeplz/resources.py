@@ -136,6 +136,7 @@ class ProcessPayment(Resource):
 
 
 class HookResource(Resource):
+
     def post(self, id):
         conn = get_mongoconn()
         userdoc = conn.User.find_one({'mailhook_id': id})
@@ -147,14 +148,17 @@ class HookResource(Resource):
         soup = BeautifulSoup(req_body_html, 'html.parser')
         img_url = soup.img.get('src')
 
+        # Make jobs
         jobs = []
         for number in userdoc['phone_numbers']:
             userdoc.update()
+            # Make sure there are messages remaining
             if userdoc['messages_remaining'] > 0:
                 jobs.append(queue.enqueue(send_picture, number, img_url))
                 userdoc['messages_remaining'] -= 1
                 userdoc.save()
 
+        # Ensure there are no jobs rejected, unfinished by Twilio
         cycles = 0
         while True:
             results = [job.result for job in jobs]
