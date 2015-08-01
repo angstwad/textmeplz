@@ -73,7 +73,7 @@
 
             this.activate = function () {
                 $http.post(accountActivateUrl).then(
-                    getActive(),
+                    getActive,
                     function () {
                         alert('Failed to activate account.');
                     }
@@ -82,7 +82,7 @@
 
             this.deactivate = function () {
                 $http.delete(accountActivateUrl).then(
-                    getActive(),
+                    getActive,
                     function () {
                         alert('Failed to deactivate account.');
                     }
