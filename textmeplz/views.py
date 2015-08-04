@@ -12,6 +12,10 @@ def bomb():
     1/0
 
 
+def tos():
+    return render_template('tos-pp.html')
+
+
 @login_required
 def index():
     userdoc = get_or_create_userdoc(user.username)

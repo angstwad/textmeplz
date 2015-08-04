@@ -8,7 +8,7 @@ from opbeat.contrib.flask import Opbeat
 from flask.ext.stormpath import StormpathManager
 
 from config import config
-from views import index, bomb
+from views import index, bomb, tos
 from resources import (
     UserInfoResource, AccountActivation, PhoneNumber, ProcessPayment,
     HookResource
@@ -18,6 +18,7 @@ routes = [
     # (route, name, view function)
     ('/app/exception', 'bomb', bomb),
     ('/app', 'index', index),
+    ('/tos', 'tos', tos)
 ]
 
 api_resources = [
@@ -49,6 +50,7 @@ def create_app():
         handler = logging.StreamHandler()
         handler.setLevel(logging.INFO)
         flask_app.logger.addHandler(handler)
+        flask_app.logger.setLevel(logging.INFO)
 
     retval = {
         'flask': flask_app,
