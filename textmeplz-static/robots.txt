@@ -1,0 +1,5 @@
+User-Agent: *
+Disallow:
+Disallow: /app
+Disallow: /login
+Disallow: /register
