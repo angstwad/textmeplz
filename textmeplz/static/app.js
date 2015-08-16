@@ -94,7 +94,7 @@
                 $http.post(phoneNumberUrl, data).then(
                     function () {
                         self.phoneNumberInput = null;
-                        getUser;
+                        getUser();
                     },
                     function () {
                         alert('Error adding phone number');
