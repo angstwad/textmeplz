@@ -109,7 +109,7 @@
                         number: number
                     },
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 };
                 $http.delete(phoneNumberUrl, config).then(

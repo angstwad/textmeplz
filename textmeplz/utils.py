@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime, timedelta
+
 import requests
 from rq import Queue
 from redis import Redis
+from dateutil.tz import tzlocal
 from twilio.rest import TwilioRestClient
 from requests.exceptions import HTTPError
 
@@ -87,3 +90,7 @@ def send_picture(recipient, media_url):
         media_url=media_url,
     )
     return message
+
+
+def get_four_days_ago():
+    return datetime.now(tz=tzlocal()) - timedelta(days=4)

@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 import uuid
+from datetime import datetime
 
 from mongokit import Document, Connection
 
 from textmeplz.config import config
-from textmeplz.utils import create_or_update_mailgun_route, delete_mailgun_route
+from textmeplz.utils import (
+    create_or_update_mailgun_route, delete_mailgun_route, get_four_days_ago
+)
+
+_mongo_conn = None
 
 
 class User(Document):
@@ -19,15 +24,18 @@ class User(Document):
         'mailhook_id': basestring,
         'mailgun_route_id': basestring,
         'enabled': bool,
+        'notifications': {
+            'last_low_notification': datetime,
+            'alerted_out': bool,
+            'count': int
+        }
     }
 
-    required_fields = ['email']
+    required_fields = ['email', 'notifications.last_low_notification']
 
     default_values = {
         'messages_remaining': 5,
     }
-
-_mongo_conn = None
 
 
 def get_mongoconn():
@@ -45,9 +53,12 @@ def get_or_create_userdoc(username):
         doc = conn.User()
         doc['email'] = username
         doc['mailhook_id'] = uuid.uuid4().hex
+        #
         resp = create_or_update_mailgun_route(**doc)
         doc['mailgun_route_id'] = resp['route']['id']
         delete_mailgun_route(**doc)
+        # Add the last bit of data
         doc['enabled'] = False
+        doc['notifications']['last_low_notification'] = get_four_days_ago()
         doc.save()
     return doc

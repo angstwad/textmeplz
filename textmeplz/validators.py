@@ -7,7 +7,10 @@ from voluptuous import Schema, Remove, REMOVE_EXTRA
 user_model_response = Schema({
     'email': basestring,
     'phone_numbers': [basestring],
-    'transactions': [],
+    'transactions': [{
+        'created': int,
+        'amount': int,
+    }],
     'messages_remaining': int,
     'mailhook_id': basestring,
     'enabled': bool,
