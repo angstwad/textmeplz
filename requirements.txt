@@ -1,3 +1,4 @@
+git+https://github.com/angstwad/stormpath-flask.git@verify_message
 aniso8601==1.0.0
 beautifulsoup4==4.4.0
 blinker==1.4
@@ -6,7 +7,6 @@ facebook-sdk==0.4.0
 Flask==0.10.1
 Flask-Login==0.2.9
 Flask-RESTful==0.3.4
-Flask-Stormpath==0.4.2
 Flask-WTF==0.12
 gnureadline==6.3.3
 gunicorn==19.3.0
