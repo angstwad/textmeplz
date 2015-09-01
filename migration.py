@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from textmeplz.mongo import get_mongoconn
-from textmeplz.utils import create_or_update_mailgun_route, delete_mailgun_route
+from textmeplz.utils import create_mailgun_route, delete_mailgun_route
 
 mongoconn = get_mongoconn()
 
@@ -15,7 +15,7 @@ for doc in mongoconn.User.find():
 
 for doc in no_route:
     print "Processing %s." % doc['mailhook_id']
-    resp = create_or_update_mailgun_route(**doc)
+    resp = create_mailgun_route(**doc)
     doc['mailgun_route_id'] = resp['route']['id']
     delete_mailgun_route(**doc)
     doc['enabled'] = False
