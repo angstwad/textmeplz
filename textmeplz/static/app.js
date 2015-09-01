@@ -120,16 +120,16 @@
                 )
             };
 
-            this.resetAccount = function() {
+            this.resetAccount = function () {
                 self.resetting = true;
                 $http.post(resetAccountUrl).then(
-                    function(){
+                    function () {
                         getUser();
                         getActive();
                         self.resetting = false;
                         alert('Your account has been reset.');
                     },
-                    function(){
+                    function () {
                         self.resetting = false;
                         alert('There was a problem resetting your account.');
                     }
@@ -161,29 +161,29 @@
                 100: 4825
             };
 
-            function chargeCard(card){
+            function chargeCard(card) {
                 var deferred = $q.defer();
                 var data = {
                     amount: $scope.amount,
                     card: card
                 };
                 $http.post(appConfig.backend + '/payment/process', data).then(
-                    function(response){
+                    function (response) {
                         deferred.resolve(response.data);
                     },
-                    function(response){
+                    function (response) {
                         deferred.reject(response);
                     }
                 );
                 return deferred.promise;
             }
 
-            $scope.onSubmit = function() {
+            $scope.onSubmit = function () {
                 $scope.processing = true;
             };
 
-            $scope.stripeCallback = function(status, response){
-                if (status == 402){
+            $scope.stripeCallback = function (status, response) {
+                if (status == 402) {
                     $scope.processing = false;
                     SweetAlert.swal({
                         title: 'There was a problem processing payment!',
@@ -191,7 +191,7 @@
                         type: 'error'
                     });
                 }
-                else if (status != 200){
+                else if (status != 200) {
                     $scope.processing = false;
                     SweetAlert.swal({
                         title: 'There was a problem processing payment!',
@@ -202,27 +202,27 @@
                 else {
                     var promise = chargeCard(response);
                     promise.then(
-                        function(data){
+                        function (data) {
                             SweetAlert.swal({
                                 title: 'Complete!',
                                 text: 'Your account has been successfully recharged.',
                                 type: 'success',
                                 timeout: 3000
-                            }, function(){
+                            }, function () {
                                 $location.url('/account');
                             });
                         },
-                        function(response){
+                        function (response) {
                             SweetAlert.swal({
                                 title: 'There was a problem processing payment!',
                                 text: 'An unknown error occurred.  Your card was not charged.',
                                 type: 'error'
-                            }, function(){
+                            }, function () {
                                 $location.url('/account');
                             });
                         }
                     );
-                    promise.finally(function(){
+                    promise.finally(function () {
                         $scope.processing = false;
                     });
                 }
