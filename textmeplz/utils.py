@@ -63,6 +63,18 @@ def delete_mailgun_route(mailhook_id, mailgun_route_id, *args, **kwargs):
     return create_or_update_mailgun_route(url, data, requests.put)
 
 
+def delete_mailgun_route_by_id(mailgun_route_id):
+    url = 'https://api.mailgun.net/v3/routes/%s' % mailgun_route_id
+    resp = requests.delete(url, auth=get_mailgun_auth())
+    try:
+        resp.raise_for_status()
+    except HTTPError as e:
+        err = MailgunError(e.message)
+        err.response = e.response
+        raise err
+    return resp.json()
+
+
 def get_twilio():
     return TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
 
