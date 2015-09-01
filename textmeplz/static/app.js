@@ -40,9 +40,10 @@
     app.controller('accountController', [
         '$http', 'appConfig',
         function ($http, appConfig) {
-            var self = this;
-            var accountActivateUrl = appConfig.backend + '/user/activate';
-            var phoneNumberUrl = appConfig.backend + '/user/phone';
+            var self = this,
+                accountActivateUrl = appConfig.backend + '/user/activate',
+                phoneNumberUrl = appConfig.backend + '/user/phone',
+                resetAccountUrl = appConfig.backend + '/user/reset';
 
             getUser();
             getActive();
@@ -118,6 +119,22 @@
                     }
                 )
             };
+
+            this.resetAccount = function() {
+                self.resetting = true;
+                $http.post(resetAccountUrl).then(
+                    function(){
+                        getUser();
+                        getActive();
+                        self.resetting = false;
+                        alert('Your account has been reset.');
+                    },
+                    function(){
+                        self.resetting = false;
+                        alert('There was a problem resetting your account.');
+                    }
+                )
+            }
 
         }
     ]);

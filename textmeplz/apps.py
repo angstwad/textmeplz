@@ -11,7 +11,7 @@ from config import config
 from views import index, bomb, tos
 from resources import (
     UserInfoResource, AccountActivation, PhoneNumber, ProcessPayment,
-    HookResource
+    HookResource, ResetAccount
 )
 
 routes = [
@@ -25,6 +25,7 @@ api_resources = [
     ('/api/user', UserInfoResource),
     ('/api/user/phone', PhoneNumber),
     ('/api/user/activate', AccountActivation),
+    ('/api/user/reset', ResetAccount),
     ('/api/payment/process', ProcessPayment),
     ('/webhook/<_id>', HookResource)
 ]

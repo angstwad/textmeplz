@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import uuid
 
 import stripe
 from bs4 import BeautifulSoup
@@ -8,11 +9,15 @@ from flask import current_app, request
 from flask.ext.login import login_required
 from flask.ext.restful.reqparse import RequestParser
 from flask.ext.restful import Resource, abort, marshal, fields
+from exc import MailgunError
 
 from textmeplz import data
 from textmeplz import validators
 from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
-from utils import create_mailgun_route, delete_mailgun_route, send_picture, queue
+from textmeplz.utils import (
+    create_mailgun_route, delete_mailgun_route, send_picture, queue,
+    delete_mailgun_route_by_id
+)
 
 
 class UserInfoResource(Resource):
@@ -82,6 +87,27 @@ class AccountActivation(Resource):
 
     def delete(self):
         userdoc = get_or_create_userdoc(user.username)
+        delete_mailgun_route(**userdoc)
+        userdoc['enabled'] = False
+        userdoc.save()
+        return {'message': 'ok'}
+
+
+class ResetAccount(Resource):
+    """ /api/user/reset
+    """
+    decorators = [login_required]
+
+    def post(self):
+        userdoc = get_or_create_userdoc(user.username)
+        try:
+            delete_mailgun_route_by_id(userdoc['mailgun_route_id'])
+        except MailgunError:
+            pass
+        userdoc['mailgun_route_id'] = None
+        userdoc['mailhook_id'] = uuid.uuid4().hex
+        resp = create_mailgun_route(**userdoc)
+        userdoc['mailgun_route_id'] = resp['route']['id']
         delete_mailgun_route(**userdoc)
         userdoc['enabled'] = False
         userdoc.save()

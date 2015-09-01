@@ -35,7 +35,7 @@
                         <label for="inputPhone">Phone Number</label>
                         <input type="text" class="form-control" ng-minlength="10" ng-maxlength="10"  id="inputPhone" name="phone" placeholder="Phone" ng-model="acctCtrl.phoneNumberInput" ng-required="true" ng-model-options="{ debounce: 500 }">
                       </div>
-                      <button type="button" class="btn btn-primary" ng-disabled="numberForm.$invalid" ng-click="acctCtrl.addNumber()"><i class="fa fa-phone"></i> Add Number</button>
+                      <button type="button" class="btn btn-primary" ng-disabled="numberForm.$invalid" ng-click="acctCtrl.addNumber()"><i class="fa fa-phone"></i>&nbsp;&nbsp;Add Number</button>
                     </div>
                     <alert ng-show="numberForm.phone.$error.minlength || numberForm.phone.$error.maxlength" type="danger">Please enter a valid 10-digit phone number.</alert>
                     <alert ng-show="numberForm.phone.$error.number" type="danger">Please ensure the number contains only digits (no dashes or spaces).</alert>
@@ -45,7 +45,8 @@
 
         <div class="well buffer-25">
             <h2>Account</h2>
-            <p class="text-info" ng-show="!acctCtrl.isActive"><strong>Hey!</strong> Your account is inactive, so you won't receive text notifications until you activate it.</p>
+            <p class="text-info" ng-show="acctCtrl.isActive"><strong>Note:</strong> Deactivating your account suspends MMS alerts until it's re-activated.</p>
+            <p class="text-info" ng-show="!acctCtrl.isActive"><strong>Hey!</strong> Your account is inactive, so you won't receive text notifications until you re-activate it.</p>
             <dl class="dl-horizontal">
                 <dt>Status</dt>
                 <dd ng-class="{'text-danger': !acctCtrl.isActive}">{{ acctCtrl.isActive ? 'Active' : 'Inactive' }}</dd>
@@ -54,11 +55,11 @@
             <button type="button" class="btn btn-success"
                     ng-hide="acctCtrl.isActive"
                     ng-click="acctCtrl.activate()">
-                <i class="fa fa-plus"></i> Activate </button>
-            <button type="button" class="btn btn-danger"
+                <i class="fa fa-plus"></i>&nbsp;&nbsp;Activate</button>
+            <button type="button" class="btn btn-warning"
                     ng-show="acctCtrl.isActive"
                     ng-click="acctCtrl.deactivate()">
-                <i class="fa fa-times"></i> Deactivate</button>
+                <i class="fa fa-times"></i>&nbsp;&nbsp;Deactivate</button>
         </div>
 
         <div class="well buffer-25">
@@ -73,7 +74,16 @@
 
             <p ng-show="acctCtrl.data.metadata.messages_remaining <= 10 && acctCtrl.data.metadata.messages_remaining > 0">
                 You're running low on messages. Would you like to get more?</p>
-            <a href="/app#/account/recharge"><button type="button" class="btn btn-sm btn-primary"><i class="fa fa-envelope-o"></i> Get More Messages</button></a>
+            <a href="/app#/account/recharge"><button type="button" class="btn btn-sm btn-primary"><i class="fa fa-envelope-o"></i>&nbsp;&nbsp;Get More Messages</button></a>
+        </div>
+
+        <div class="well buffer-25">
+            <h2>Account Reset</h2>
+            <p>Occasionally, notifications fail to be delivered to Text Me Plz by Netgear. Resetting your account can resolve this issue.  Reset should be considered after MMS messages consistently fail to be delivered.</p>
+            <p class="text-warning"><strong>Caution:</strong> You will receive a new notification email and you will have to update your notification settings in the Arlo control panel. Please use this as a last resort.</p>
+            <button type="button" class="btn btn-danger" style="" ng-click="acctCtrl.resetAccount()">
+                <i class="fa fa-refresh" ng-class="{'fa-spin': acctCtrl.resetting}"></i>&nbsp;&nbsp;Reset Account
+            </button>
         </div>
 
         <div class="well buffer-25">
