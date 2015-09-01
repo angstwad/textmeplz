@@ -2,8 +2,8 @@
 from __future__ import absolute_import
 
 from flask import render_template
-from flask.ext.login import login_required
 from flask.ext.stormpath import user
+from flask.ext.login import login_required
 
 from textmeplz.mongo import get_or_create_userdoc
 

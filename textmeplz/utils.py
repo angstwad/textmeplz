@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-from redis import Redis
 
 import requests
 from rq import Queue
+from redis import Redis
 from twilio.rest import TwilioRestClient
 from requests.exceptions import HTTPError
 
-from config import config
-from exc import MailgunError
-from config.config import (
+from textmeplz.config import config
+from textmeplz.exc import MailgunError
+from textmeplz.config.config import (
     MAILGUN_API_KEY, MAILHOOK_URL, TWILIO_NUMBER, TWILIO_SID, TWILIO_TOKEN
 )
 
