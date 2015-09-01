@@ -31,7 +31,7 @@ def create_or_update_mailgun_route(url, data, requests_method):
     return resp.json()
 
 
-def create_mailgun_route(mailhook_id, mailgun_route_id=None):
+def create_mailgun_route(mailhook_id, mailgun_route_id=None, *args, **kwargs):
     data = {
         'priority': 1,
         'description': "TextMePlz user identified by %s" % mailhook_id,
@@ -50,7 +50,7 @@ def create_mailgun_route(mailhook_id, mailgun_route_id=None):
     return create_or_update_mailgun_route(url, data, meth)
 
 
-def delete_mailgun_route(mailhook_id, mailgun_route_id):
+def delete_mailgun_route(mailhook_id, mailgun_route_id, *args, **kwargs):
     url = 'https://api.mailgun.net/v3/routes/%s' % mailgun_route_id
     data = {
         'priority': 1,
