@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from voluptuous import Schema, Remove, Any, REMOVE_EXTRA
+from voluptuous import Schema, Remove, REMOVE_EXTRA
 
 
 user_model_response = Schema({
@@ -9,7 +9,7 @@ user_model_response = Schema({
     'phone_numbers': [basestring],
     'transactions': [],
     'messages_remaining': int,
-    'mailhook_id': basestring,
+    'enabled': bool,
     Remove('_id'): None,
 }, extra=REMOVE_EXTRA)
 

@@ -4,6 +4,7 @@ import uuid
 from mongokit import Document, Connection
 
 from textmeplz.config import config
+from textmeplz.utils import create_or_update_mailgun_route, delete_mailgun_route
 
 
 class User(Document):
@@ -17,6 +18,7 @@ class User(Document):
         'messages_remaining': int,
         'mailhook_id': basestring,
         'mailgun_route_id': basestring,
+        'enabled': bool,
     }
 
     required_fields = ['email']
@@ -43,5 +45,9 @@ def get_or_create_userdoc(username):
         doc = conn.User()
         doc['email'] = username
         doc['mailhook_id'] = uuid.uuid4().hex
+        resp = create_or_update_mailgun_route(**doc)
+        doc['mailgun_route_id'] = resp['route']['id']
+        delete_mailgun_route(**doc)
+        doc['enabled'] = False
         doc.save()
     return doc

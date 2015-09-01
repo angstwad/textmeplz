@@ -15,12 +15,23 @@ from config.config import (
 redis_conn = Redis(config.REDIS_HOST)
 queue = Queue(connection=redis_conn)
 
+
 def get_mailgun_auth():
     return 'api', MAILGUN_API_KEY
 
 
-def create_mailgun_route(mailhook_id):
-    url = 'https://api.mailgun.net/v3/routes'
+def create_or_update_mailgun_route(url, data, requests_method):
+    resp = requests_method(url, data=data, auth=get_mailgun_auth())
+    try:
+        resp.raise_for_status()
+    except HTTPError as e:
+        err = MailgunError(e.message)
+        err.response = e.response
+        raise err
+    return resp.json()
+
+
+def create_mailgun_route(mailhook_id, mailgun_route_id=None):
     data = {
         'priority': 1,
         'description': "TextMePlz user identified by %s" % mailhook_id,
@@ -30,26 +41,26 @@ def create_mailgun_route(mailhook_id):
             "stop()"
         ]
     }
-    resp = requests.post(url, data=data, auth=get_mailgun_auth())
-    try:
-        resp.raise_for_status()
-    except HTTPError as e:
-        err = MailgunError(e.message)
-        err.response = e.response
-        raise err
-    return resp.json()
+    if mailgun_route_id is None:
+        url = 'https://api.mailgun.net/v3/routes'
+        meth = requests.post
+    else:
+        url = 'https://api.mailgun.net/v3/routes/%s' % mailgun_route_id
+        meth = requests.put
+    return create_or_update_mailgun_route(url, data, meth)
 
 
-def delete_mailgun_route(route_id):
-    url = 'https://api.mailgun.net/v3/routes/%s' % route_id
-    resp = requests.delete(url, auth=get_mailgun_auth())
-    try:
-        resp.raise_for_status()
-    except HTTPError as e:
-        err = MailgunError(e.message)
-        err.response = e.response
-        raise err
-    return resp.json()
+def delete_mailgun_route(mailhook_id, mailgun_route_id):
+    url = 'https://api.mailgun.net/v3/routes/%s' % mailgun_route_id
+    data = {
+        'priority': 1,
+        'description': "TextMePlz user identified by %s" % mailhook_id,
+        'expression': "match_recipient('%s@mg.textmeplz.com')" % mailhook_id,
+        'action': [
+            "stop()"
+        ]
+    }
+    return create_or_update_mailgun_route(url, data, requests.put)
 
 
 def get_twilio():

@@ -11,7 +11,6 @@ from flask.ext.restful import Resource, abort, marshal, fields
 
 from textmeplz import data
 from textmeplz import validators
-from textmeplz.exc import MailgunError
 from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
 from utils import create_mailgun_route, delete_mailgun_route, send_picture, queue
 
@@ -72,31 +71,20 @@ class AccountActivation(Resource):
 
     def get(self):
         userdoc = get_or_create_userdoc(user.username)
-        if userdoc['mailgun_route_id']:
-            return {'active': True}
-        else:
-            return {'active': False}
+        return {'active': userdoc['enabled']}
 
     def post(self):
         userdoc = get_or_create_userdoc(user.username)
-        if not userdoc['mailgun_route_id']:
-            response = create_mailgun_route(userdoc['mailhook_id'])
-            userdoc['mailgun_route_id'] = response['route']['id']
-            userdoc.save()
+        create_mailgun_route(**userdoc)
+        userdoc['enabled'] = True
+        userdoc.save()
         return {'message': 'ok'}
 
     def delete(self):
         userdoc = get_or_create_userdoc(user.username)
-        if not userdoc['mailgun_route_id']:
-            abort(400, message='account is not active')
-        try:
-            delete_mailgun_route(userdoc['mailgun_route_id'])
-        except MailgunError:
-            userdoc['mailgun_route_id'] = None
-            userdoc.save()
-        else:
-            userdoc['mailgun_route_id'] = None
-            userdoc.save()
+        delete_mailgun_route(**userdoc)
+        userdoc['enabled'] = False
+        userdoc.save()
         return {'message': 'ok'}
 
 
