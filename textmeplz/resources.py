@@ -18,7 +18,7 @@ from textmeplz.exc import MailgunError
 from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
 from textmeplz.utils import (
     create_mailgun_route, delete_mailgun_route, send_picture, queue,
-    delete_mailgun_route_by_id
+    delete_mailgun_route_by_id, get_four_days_ago
 )
 
 
@@ -146,7 +146,9 @@ class ProcessPayment(Resource):
 
         userdoc = get_or_create_userdoc(user.username)
         userdoc['transactions'].append(charge)
-        userdoc['messages_remaining'] += data.PRICE_MAP[args.amount];
+        userdoc['messages_remaining'] += data.PRICE_MAP[args.amount]
+        userdoc['notifications']['last_low_notification'] = get_four_days_ago()
+        userdoc['notifications']['alerted_out'] = False
         userdoc.save()
         return {'message': 'successful'}
 
@@ -178,9 +180,13 @@ class HookResource(Resource):
             if userdoc['messages_remaining'] > 0:
                 jobs.append(queue.enqueue(send_picture, number, img_url))
                 userdoc['messages_remaining'] -= 1
-                userdoc.save()
+            else:
+                # Deactivate users without remaining messages
+                delete_mailgun_route(**userdoc)
+                userdoc['enabled'] = False
+            userdoc.save()
 
-        # Ensure there are no jobs rejected, unfinished by Twilio
+        # Ensure there are no jobs rejected or unfinished by Twilio
         cycles = 0
         while True:
             results = [job.result for job in jobs]
@@ -193,13 +199,14 @@ class HookResource(Resource):
                     '%s' % (', '.join(bad_jobs))
                 )
                 userdoc.update()
-                userdoc['messages_remaininge'] += results.count(None)
+                userdoc['messages_remaining'] += results.count(None)
                 userdoc.save()
                 abort(500)
 
             cycles += 1
             time.sleep(.1)
 
+        # Log jobs
         for job in jobs:
             try:
                 sid = job.result.sid

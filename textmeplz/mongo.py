@@ -27,7 +27,6 @@ class User(Document):
         'notifications': {
             'last_low_notification': datetime,
             'alerted_out': bool,
-            'count': int
         }
     }
 
