@@ -47,11 +47,11 @@ def create_app():
     for route, resource in api_resources:
         api.add_resource(resource, route)
 
-    if not flask_app.debug:
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.INFO)
-        flask_app.logger.addHandler(handler)
-        flask_app.logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.WARNING)
+    flask_app.logger.addHandler(handler)
+    # fix gives access to the gunicorn error log facility
+    flask_app.logger.handlers.extend(logging.getLogger("gunicorn.error").handlers)
 
     retval = {
         'flask': flask_app,
