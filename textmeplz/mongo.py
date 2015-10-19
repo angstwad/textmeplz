@@ -5,7 +5,7 @@ from mongokit import Document, Connection
 
 from textmeplz.config import config
 from textmeplz.utils import (
-    delete_mailgun_route, get_four_days_ago, create_mailgun_route
+    delete_mailgun_route, create_mailgun_route
 )
 
 _mongo_conn = None
