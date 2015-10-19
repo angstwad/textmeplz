@@ -4,7 +4,11 @@ import uuid
 from mongokit import Document, Connection
 
 from textmeplz.config import config
-from textmeplz.utils import create_or_update_mailgun_route, delete_mailgun_route
+from textmeplz.utils import (
+    delete_mailgun_route, get_four_days_ago, create_mailgun_route
+)
+
+_mongo_conn = None
 
 
 class User(Document):
@@ -45,7 +49,7 @@ def get_or_create_userdoc(username):
         doc = conn.User()
         doc['email'] = username
         doc['mailhook_id'] = uuid.uuid4().hex
-        resp = create_or_update_mailgun_route(**doc)
+        resp = create_mailgun_route(**doc)
         doc['mailgun_route_id'] = resp['route']['id']
         delete_mailgun_route(**doc)
         doc['enabled'] = False
