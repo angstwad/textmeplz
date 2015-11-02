@@ -66,7 +66,6 @@
                         self.isActive = response.data.active;
                     },
                     function () {
-                        console.log(arguments);
                         alert('There was a problem loading account activation data.');
                     }
                 )
