@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from flask import render_template
+from flask import render_template, abort
 from flask.ext.stormpath import user
 from flask.ext.login import login_required
 
@@ -9,7 +9,7 @@ from textmeplz.mongo import get_or_create_userdoc
 
 
 def bomb():
-    1/0
+    raise Exception
 
 
 def tos():
