@@ -193,7 +193,7 @@ class HookResource(Resource):
                     '%s' % (', '.join(bad_jobs))
                 )
                 userdoc.update()
-                userdoc['messages_remaininge'] += results.count(None)
+                userdoc['messages_remaining'] += results.count(None)
                 userdoc.save()
                 abort(500)
 
