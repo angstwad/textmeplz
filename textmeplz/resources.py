@@ -187,7 +187,7 @@ class HookResource(Resource):
             userdoc.update()
             # Make sure there are messages remaining
             if userdoc['messages_remaining'] > 0:
-                jobs.append(queue.enqueue(send_picture, number, img_url))
+                jobs.append(queue.enqueue(send_picture, number, img_url, userdoc['email']))
                 userdoc['messages_remaining'] -= 1
                 userdoc.save()
 

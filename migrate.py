@@ -2,6 +2,7 @@
 import os
 import json
 import pymongo
+import dateutil.parser
 
 host = 'mongodb://pdurivage:zsVjnTWepfrwDyrsWxqqGjD2@ds151068.mlab.com:51068/textmeplz'
 mongo = pymongo.MongoClient(host)
@@ -18,6 +19,8 @@ for fname in os.listdir(path):
       "first_name": data['givenName'],
       "last_name": data['surname'],
       "password": data['password'],
+      "created": dateutil.parser.parse(data['createdAt']),
+      "reset_token": None,
     }
     result = db.user.find_one_and_update({'email': data['email']}, {'$set': update}, {'upsert': True})
     if result:

@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 import requests
 from rq import Queue
 from redis import Redis
+from dateutil.tz import tzutc
 from twilio.rest import TwilioRestClient
 from requests.exceptions import HTTPError
 
 from textmeplz.config import config
 from textmeplz.exc import MailgunError
+from textmeplz.mongo import get_mongoconn
 from textmeplz.config.config import (
     MAILGUN_API_KEY, MAILHOOK_URL, TWILIO_NUMBER, TWILIO_SID, TWILIO_TOKEN
 )
@@ -78,11 +82,18 @@ def get_twilio():
     return TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
 
 
-def send_picture(recipient, media_url):
+def send_picture(recipient, media_url, email):
     twclient = get_twilio()
     message = twclient.messages.create(
         from_=TWILIO_NUMBER,
         to=recipient,
         media_url=media_url,
     )
+    log = get_mongoconn().Log({
+        'created': datetime.now(tz=tzutc()),
+        'level': 'info',
+        'message': "Sent text to %s, media: %s" % (recipient, media_url),
+        'email': email
+    })
+    log.save()
     return message
