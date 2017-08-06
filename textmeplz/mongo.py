@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.tz import tzutc
 from mongokit import Document, Connection
 
-from textmeplz.config import config
+from config import config
 from textmeplz.utils import (
     delete_mailgun_route, create_mailgun_route
 )
@@ -57,14 +57,6 @@ class Log(Document):
     }
 
 
-def get_mongoconn():
-    global _mongo_conn
-    if _mongo_conn is None:
-        _mongo_conn = Connection(config.MONGO_URI, **config.MONGO_KWARGS)
-        _mongo_conn.register([User, Log])
-    return _mongo_conn
-
-
 def get_or_create_userdoc(username):
     conn = get_mongoconn()
     doc = conn.User.find_one({'email': username})
@@ -79,3 +71,11 @@ def get_or_create_userdoc(username):
         doc['created'] = datetime.now(tz=tzutc())
         doc.save()
     return doc
+
+
+def get_mongoconn():
+    global _mongo_conn
+    if _mongo_conn is None:
+        _mongo_conn = Connection(config.MONGO_URI, **config.MONGO_KWARGS)
+        _mongo_conn.register([User, Log])
+    return _mongo_conn

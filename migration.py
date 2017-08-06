@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from textmeplz.mongo import get_mongoconn
+from mongo import get_mongoconn
 from textmeplz.utils import create_mailgun_route, delete_mailgun_route
 
 mongoconn = get_mongoconn()

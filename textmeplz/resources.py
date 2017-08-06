@@ -12,9 +12,10 @@ from flask_restful import Resource, abort, fields
 from flask_login import login_required, current_user
 
 from textmeplz import data
+from textmeplz.mongo import get_mongoconn
 from textmeplz import validators
 from textmeplz.exc import MailgunError
-from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
+from textmeplz.mongo import get_or_create_userdoc
 from textmeplz.utils import (
     create_mailgun_route, delete_mailgun_route, send_picture, queue,
     delete_mailgun_route_by_id
