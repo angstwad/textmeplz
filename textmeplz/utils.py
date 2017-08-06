@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import requests
 from rq import Queue
 from redis import Redis

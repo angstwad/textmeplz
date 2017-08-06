@@ -4,9 +4,9 @@ import uuid
 from datetime import datetime
 
 import stripe
+from flask import request
 from bs4 import BeautifulSoup
 from dateutil.tz import tzutc
-from flask import current_app, request
 from flask_restful.reqparse import RequestParser
 from flask_restful import Resource, abort, fields
 from flask_login import login_required, current_user

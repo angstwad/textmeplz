@@ -9,10 +9,9 @@ from dateutil.tz import tzutc
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user, logout_user, login_user
 
-from login import send_password_reset_email, ResetPasswordForm
-from textmeplz.login import LoginForm, RegistrationForm, process_login, User, \
-    RequestResetForm
 from textmeplz.mongo import get_or_create_userdoc, get_mongoconn
+from textmeplz.login import LoginForm, RegistrationForm, process_login, User, \
+    RequestResetForm, send_password_reset_email, ResetPasswordForm
 
 
 def bomb():

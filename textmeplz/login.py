@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import bcrypt as bcrypt
 import requests
+import bcrypt as bcrypt
 from flask import current_app
 from flask_wtf import FlaskForm
 from flask_login import login_user
@@ -9,7 +9,7 @@ from wtforms.fields.html5 import EmailField
 from wtforms import PasswordField, StringField
 from wtforms.validators import EqualTo, Length, Email, DataRequired
 
-from mongo import get_mongoconn
+from textmeplz.mongo import get_mongoconn
 
 
 class LoginForm(FlaskForm):
