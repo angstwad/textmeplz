@@ -9,7 +9,8 @@ from flask_login import LoginManager
 from textmeplz.config import config
 from textmeplz.exc import init_rollbar
 from textmeplz.login import load_user
-from textmeplz.views import index, bomb, tos, login_register, logout
+from textmeplz.views import index, bomb, tos, login_register, logout, \
+    reset_request, reset_password
 from textmeplz.resources import (
     UserInfoResource, AccountActivation, PhoneNumber, ProcessPayment,
     HookResource, ResetAccount
@@ -17,21 +18,23 @@ from textmeplz.resources import (
 
 routes = [
     # (route, name, view function)
-    ('/app/exception', 'bomb', bomb, ['GET']),
-    ('/app', 'index', index, ['GET']),
-    ('/tos', 'tos', tos, ['GET']),
-    ('/login', 'login', login_register, ['GET', 'POST']),
-    ('/register', 'register', login_register, ['GET', 'POST']),
-    ('/logout', 'logout', logout, ['GET']),
+    ('/app/exception',          'bomb',                   bomb,                   ['GET']),
+    ('/app',                    'index',                  index,                  ['GET']),
+    ('/tos',                    'tos',                    tos,                    ['GET']),
+    ('/login',                  'login',                  login_register,         ['GET', 'POST']),
+    ('/register',               'register',               login_register,         ['GET', 'POST']),
+    ('/logout',                 'logout',                 logout,                 ['GET']),
+    ('/reset/password',         'reset_request',          reset_request,          ['GET', 'POST']),
+    ('/reset/password/<token>', 'reset_password',         reset_password,         ['GET', 'POST']),
 ]
 
 api_resources = [
-    ('/api/user', UserInfoResource),
-    ('/api/user/phone', PhoneNumber),
-    ('/api/user/activate', AccountActivation),
-    ('/api/user/reset', ResetAccount),
+    ('/api/user',            UserInfoResource),
+    ('/webhook/<_id>',       HookResource),
+    ('/api/user/phone',      PhoneNumber),
+    ('/api/user/reset',      ResetAccount),
+    ('/api/user/activate',   AccountActivation),
     ('/api/payment/process', ProcessPayment),
-    ('/webhook/<_id>', HookResource)
 ]
 
 

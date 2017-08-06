@@ -2,7 +2,7 @@
 <html lang="en">
 
     <head>
-        <title>Text Me Plz - Login</title>
+        <title>Text Me Plz - Password Reset</title>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,17 +40,16 @@
 
                     <div class="row">
                         <div class="col-sm-8 col-sm-offset-2 text">
-                            <h1>Text Me Plz - Login</h1>
+                            <h1>Text Me Plz</h1>
                             <div class="description">
                                 <p>
-                                    If you have an account, please log in.</br>
-                                    If you don't have an account, registration is free and comes with five free messages.
+                                    Password Reset Request
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
+                   <div class="row">
                         <div class="col-sm-8 col-sm-offset-2 text-left">
                             {% for category, message in get_flashed_messages(with_categories=True) %}
                                 {% if category == 'message' %} {% set category = 'info' %} {% endif %}
@@ -68,64 +67,33 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-sm-5">
+                        <div class="col-sm-6 col-sm-offset-3">
 
                             <div class="form-box">
                                 <div class="form-top">
                                     <div class="form-top-left">
-                                        <h3>Login</h3>
+                                        <h3>Reset</h3>
                                     </div>
                                     <div class="form-top-right">
-                                        <i class="fa fa-key"></i>
+                                        <i class="fa fa-unlock-alt"></i>
                                     </div>
                                 </div>
                                 <div class="form-bottom">
-                                    <form role="form" action="/login" method="post" class="login-form">
-                                        {{ login_form.csrf_token }}
-                                        {% for field in login_form %}
+                                    <form role="form" action="" method="post" class="login-form">
+                                        {{ form.csrf_token }}
+                                        {% for field in form %}
                                             <div class="form-group">
                                                 <label class="sr-only" for="{{ field.name }}">{{ field.label.text }}</label>
                                                 {{ field(class_='form-email form-control', placeholder=field.label.text) }}
                                             </div>
                                         {% endfor %}
                                         <button type="submit" class="btn">Log In</button>
-                                        <p class="text-right pad-20">
-                                            <a href="{{ url_for('reset_request') }}">Forgot your password?</a>
-                                        </p>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-1 middle-border"></div>
-                        <div class="col-sm-1"></div>
-
-                        <div class="col-sm-5">
-
-                            <div class="form-box">
-                                <div class="form-top">
-                                    <div class="form-top-left">
-                                        <h3>Register</h3>
-                                    </div>
-                                    <div class="form-top-right">
-                                        <i class="fa fa-pencil"></i>
-                                    </div>
-                                </div>
-                                <div class="form-bottom">
-                                    <form role="form" action="/register" method="post" class="registration-form">
-                                        {{ registration_form.csrf_token }}
-                                        {% for field in registration_form %}
-                                            <div class="form-group">
-                                                <label class="sr-only" for="{{ field.name }}">{{ field.label.text }}</label>
-                                                {{ field(class_='form-email form-control', placeholder=field.label.text) }}
-                                            </div>
-                                        {% endfor %}
-                                        <button type="submit" class="btn">Register</button>
                                     </form>
                                 </div>
                             </div>
 
                         </div>
+
                     </div>
 
                 </div>

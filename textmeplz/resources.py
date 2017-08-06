@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
 import uuid
+from datetime import datetime
 
 import stripe
 from bs4 import BeautifulSoup
+from dateutil.tz import tzutc
 from flask import current_app, request
 from flask_restful.reqparse import RequestParser
 from flask_restful import Resource, abort, fields
@@ -143,7 +145,13 @@ class ProcessPayment(Resource):
             description="Recharge for user %s" % current_user['email']
         )
         if not charge['captured']:
-            current_app.logger.error(charge)
+            log = get_mongoconn().Log({
+                'created': datetime.now(tz=tzutc()),
+                'email': current_user['email'],
+                'level': 'error',
+                'message': 'Charge error: %s' % charge
+            })
+            log.save()
             abort(402, message="failed to charge")
 
         userdoc = get_or_create_userdoc(current_user['email'])
@@ -164,11 +172,13 @@ class HookResource(Resource):
             abort(400)
         soup = BeautifulSoup(req_body_html, 'html.parser')
         img_url = soup.img.get('src')
-        current_app.logger.info(
-            'Mailhook for %s (%s) with Mailgun ID %s.' % (
-                userdoc['email'], _id, request.form.get('Message-Id')
-            )
-        )
+        log = get_mongoconn().Log({
+            'created': datetime.now(tz=tzutc()),
+            'email': userdoc['email'],
+            'message': 'Received mailhook for ID "%s", Mailgun message ID '
+                       '"%s".' % (_id, request.form.get('Message-Id'))
+        })
+        log.save()
 
         # Make jobs
         jobs = []
@@ -188,10 +198,14 @@ class HookResource(Resource):
                 break
             elif cycles > 150:
                 bad_jobs = [job.result.sid for job in jobs if job is None]
-                current_app.logger.error(
-                    'Had unfinished jobs after 150 checks (~15 secs): '
-                    '%s' % (', '.join(bad_jobs))
-                )
+                log = get_mongoconn().Log({
+                    'created': datetime.now(tz=tzutc()),
+                    'email': userdoc['email'],
+                    'level': 'error',
+                    'message': 'Had unfinished jobs after 150 checks (~15 '
+                               'secs): %s' % (', '.join(bad_jobs)),
+                })
+                log.save()
                 userdoc.update()
                 userdoc['messages_remaining'] += results.count(None)
                 userdoc.save()
@@ -205,10 +219,12 @@ class HookResource(Resource):
                 sid = job.result.sid
             except AttributeError:
                 sid = None
-            current_app.logger.info(
-                "User %s (%s) created message id %s." % (
-                    userdoc['email'], _id, sid
-                )
-            )
+            log = get_mongoconn().Log({
+                'created': datetime.now(tz=tzutc()),
+                'email': userdoc['email'],
+                'message': "User %s (%s) created message id %s."
+                           "" % (userdoc['email'], _id, sid)
+            })
+            log.save()
 
         return {'message': 'ok'}

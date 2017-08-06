@@ -29,6 +29,7 @@ class User(Document):
         'first_name': basestring,
         'last_name': basestring,
         'created': datetime,
+        'reset_token': basestring,
     }
 
     required_fields = ['email']
@@ -38,11 +39,29 @@ class User(Document):
     }
 
 
+class Log(Document):
+    __collection__ = 'logs'
+    __database__ = 'textmeplz'
+
+    structure = {
+        'email': basestring,
+        'message': basestring,
+        'created': datetime,
+        'level': basestring,
+    }
+
+    required_fields = ['email', 'message', 'created']
+
+    default_values = {
+        'level': 'info',
+    }
+
+
 def get_mongoconn():
     global _mongo_conn
     if _mongo_conn is None:
         _mongo_conn = Connection(config.MONGO_URI, **config.MONGO_KWARGS)
-        _mongo_conn.register([User])
+        _mongo_conn.register([User, Log])
     return _mongo_conn
 
 
