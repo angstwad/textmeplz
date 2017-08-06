@@ -4,13 +4,10 @@ import uuid
 
 import stripe
 from bs4 import BeautifulSoup
-from flask.ext.stormpath import user
 from flask import current_app, request
-from flask.ext.login import login_required
-
-from flask.ext.restful.reqparse import RequestParser
-
-from flask.ext.restful import Resource, abort, marshal, fields
+from flask_restful.reqparse import RequestParser
+from flask_restful import Resource, abort, fields
+from flask_login import login_required, current_user
 
 from textmeplz import data
 from textmeplz import validators
@@ -34,15 +31,20 @@ class UserInfoResource(Resource):
     }
 
     def get(self):
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         return {
             'metadata': validators.user_model_response(userdoc),
-            'administrative': marshal(user, self.user_marshal)
+            'administrative': {
+                'full_name': ("%s %s" % (current_user['first_name'],
+                                         current_user['last_name'])).title(),
+                'username': current_user['email'],
+                'created_at': None
+            }
         }
 
 
 class PhoneNumber(Resource):
-    """ /api/user/phone
+    """ /api/current_user/phone
     """
     decorators = [login_required]
 
@@ -55,14 +57,14 @@ class PhoneNumber(Resource):
         self._validate()
         if not validators.validate_phone_number(self.args.number):
             abort(400, message='Number must be a US or a Canadian')
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         userdoc['phone_numbers'].append('+1%s' % self.args.number)
         userdoc.save()
         return {'message': 'saved'}
 
     def delete(self):
         self._validate()
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         if self.args.number not in userdoc['phone_numbers']:
             abort(404, message='Number not found.')
         while self.args.number in userdoc['phone_numbers']:
@@ -77,18 +79,18 @@ class AccountActivation(Resource):
     decorators = [login_required]
 
     def get(self):
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         return {'active': userdoc['enabled']}
 
     def post(self):
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         create_mailgun_route(**userdoc)
         userdoc['enabled'] = True
         userdoc.save()
         return {'message': 'ok'}
 
     def delete(self):
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         delete_mailgun_route(**userdoc)
         userdoc['enabled'] = False
         userdoc.save()
@@ -101,7 +103,7 @@ class ResetAccount(Resource):
     decorators = [login_required]
 
     def post(self):
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         try:
             delete_mailgun_route_by_id(userdoc['mailgun_route_id'])
         except MailgunError:
@@ -138,21 +140,20 @@ class ProcessPayment(Resource):
             amount=args.amount * 100,
             currency="usd",
             source=args.card['id'],
-            description="Recharge for user %s" % user.username
+            description="Recharge for user %s" % current_user['email']
         )
         if not charge['captured']:
             current_app.logger.error(charge)
             abort(402, message="failed to charge")
 
-        userdoc = get_or_create_userdoc(user.username)
+        userdoc = get_or_create_userdoc(current_user['email'])
         userdoc['transactions'].append(charge)
-        userdoc['messages_remaining'] += data.PRICE_MAP[args.amount];
+        userdoc['messages_remaining'] += data.PRICE_MAP[args.amount]
         userdoc.save()
         return {'message': 'successful'}
 
 
 class HookResource(Resource):
-
     def post(self, _id):
         conn = get_mongoconn()
         userdoc = conn.User.find_one({'mailhook_id': _id})
@@ -163,7 +164,6 @@ class HookResource(Resource):
             abort(400)
         soup = BeautifulSoup(req_body_html, 'html.parser')
         img_url = soup.img.get('src')
-
         current_app.logger.info(
             'Mailhook for %s (%s) with Mailgun ID %s.' % (
                 userdoc['email'], _id, request.form.get('Message-Id')

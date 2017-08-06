@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import uuid
+from datetime import datetime
 
+from dateutil.tz import tzutc
 from mongokit import Document, Connection
 
 from textmeplz.config import config
@@ -23,6 +25,10 @@ class User(Document):
         'mailhook_id': basestring,
         'mailgun_route_id': basestring,
         'enabled': bool,
+        'password': basestring,
+        'first_name': basestring,
+        'last_name': basestring,
+        'created': datetime,
     }
 
     required_fields = ['email']
@@ -30,8 +36,6 @@ class User(Document):
     default_values = {
         'messages_remaining': 5,
     }
-
-_mongo_conn = None
 
 
 def get_mongoconn():
@@ -53,5 +57,6 @@ def get_or_create_userdoc(username):
         doc['mailgun_route_id'] = resp['route']['id']
         delete_mailgun_route(**doc)
         doc['enabled'] = False
+        doc['created'] = datetime.now(tz=tzutc())
         doc.save()
     return doc

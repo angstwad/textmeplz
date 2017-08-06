@@ -69,15 +69,15 @@
       <ul class="nav navbar-nav navbar-right">
       <p class="navbar-text"></p>
         <li class="dropdown">
-          {% if user.is_authenticated() %}
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ user.full_name|title }} <span class="caret"></span></a>
+          {% if current_user.is_authenticated %}
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ ("%s %s" % (current_user['first_name'], current_user['last_name']))|title }} <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="{{ url_for('stormpath.logout') }}">Log Out</a></li>
+              <li><a href="{{ url_for('logout') }}">Log Out</a></li>
           {% else %}
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">User <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="{{ url_for('stormpath.register') }}">Register</a></li>
-              <li><a href="{{ url_for('stormpath.login') }}">Log In</a></li>
+              <li><a href="{{ url_for('register') }}">Register</a></li>
+              <li><a href="{{ url_for('login') }}">Log In</a></li>
           {% endif %}
           </ul>
         </li>

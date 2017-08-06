@@ -22,7 +22,7 @@ for msg in msgsiterable:
 def process_messages(thread_num):
     print "Thread %s starting up." % thread_num
     while not tasks.empty():
-        msg = tasks.get()
+        msg = tasks.load()
         try:
             for media in msg.media_list.list():
                 print "Thread %s deleting media %s" % (thread_num, media.sid)

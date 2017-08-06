@@ -5,7 +5,7 @@ import rollbar
 from rollbar.contrib.flask import report_exception
 from flask import got_request_exception, current_app
 
-from config import config
+from textmeplz.config import config
 
 
 def init_rollbar():
