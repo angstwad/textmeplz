@@ -176,7 +176,8 @@ class HookResource(Resource):
             'created': datetime.now(tz=tzutc()),
             'email': userdoc['email'],
             'message': 'Received mailhook for ID "%s", Mailgun message ID '
-                       '"%s".' % (_id, request.form.get('Message-Id'))
+                       '"%s".' % (_id, request.form.get('Message-Id')),
+            'level': 'info',
         })
         log.save()
 
@@ -223,7 +224,8 @@ class HookResource(Resource):
                 'created': datetime.now(tz=tzutc()),
                 'email': userdoc['email'],
                 'message': "User %s (%s) created message id %s."
-                           "" % (userdoc['email'], _id, sid)
+                           "" % (userdoc['email'], _id, sid),
+                'level': 'info',
             })
             log.save()
 

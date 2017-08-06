@@ -2,8 +2,10 @@
 from __future__ import absolute_import
 
 import uuid
+from datetime import datetime
 
 import bcrypt
+from dateutil.tz import tzutc
 from flask import render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user, logout_user, login_user
 
@@ -38,6 +40,15 @@ def reset_request():
 
         if validated:
             userdoc = get_or_create_userdoc(form.email.data)
+
+            log = get_mongoconn().Log({
+                'email': userdoc['email'],
+                'created': datetime.now(tz=tzutc()),
+                'message': 'Requested password reset.',
+                'level': 'info',
+            })
+            log.save()
+
             reset_token = uuid.uuid4().hex
             userdoc['reset_token'] = reset_token
             userdoc.save()
@@ -66,6 +77,15 @@ def reset_password(token):
             userdoc['password'] = bcrypt.hashpw(password, bcrypt.gensalt())
             userdoc['reset_token'] = None
             userdoc.save()
+
+            log = get_mongoconn().Log({
+                'email': userdoc['email'],
+                'created': datetime.now(tz=tzutc()),
+                'message': 'Reset password.',
+                'level': 'info',
+            })
+            log.save()
+
             flash('Password has been reset. Please log in.', 'success')
             return redirect(url_for('login'))
 
